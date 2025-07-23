@@ -1,6 +1,0 @@
-flask
-numpy
-scipy
-scikit-learn
-
-
