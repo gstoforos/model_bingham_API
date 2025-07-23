@@ -1,12 +1,10 @@
 services:
   - type: web
-    name: model_bingham_API
+    name: bingham-api
     env: python
-    plan: free
     buildCommand: ""
-    startCommand: "python app.py"
-    region: oregon
-
+    startCommand: python app.py
+    plan: free
 
 
 
