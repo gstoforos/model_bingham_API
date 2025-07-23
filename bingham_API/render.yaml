@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: bingham-api
+    env: python
+    buildCommand: ""
+    startCommand: python app.py
+
+
+
+
+
+
