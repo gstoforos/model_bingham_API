@@ -7,6 +7,7 @@ app = Flask(__name__)
 def fit_bingham():
     try:
         data = request.get_json(force=True)
+
         shear_rates = data.get("shear_rates", [])
         shear_stresses = data.get("shear_stresses", [])
         flow_rate = float(data.get("flow_rate", 1))

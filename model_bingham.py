@@ -10,40 +10,46 @@ def fit_bingham_model(shear_rates, shear_stresses, flow_rate, diameter, density)
     shear_stresses = np.array(shear_stresses, dtype=float)
 
     try:
-        # Initial parameter guess
+        # Initial guesses for τ₀ and μ
         initial_tau0 = np.min(shear_stresses)
         initial_mu = (np.max(shear_stresses) - initial_tau0) / max(np.max(shear_rates) - np.min(shear_rates), 1e-6)
 
-        # Fit model
+        # Fit the Bingham model: τ = τ₀ + μ·γ̇
         popt, _ = curve_fit(bingham_model, shear_rates, shear_stresses, p0=[initial_tau0, initial_mu], maxfev=10000)
         tau0, mu = popt
 
-        # R²
+        # Predicted shear stress for R²
         predicted = bingham_model(shear_rates, tau0, mu)
         r2 = r2_score(shear_stresses, predicted)
 
-        # Apparent viscosity
+        # Apparent viscosity at mean shear rate
         mean_gamma_dot = np.mean(shear_rates)
-        tau = bingham_model(mean_gamma_dot, tau0, mu)
-        mu_app = tau / mean_gamma_dot if mean_gamma_dot != 0 else 1.0
+        apparent_tau = bingham_model(mean_gamma_dot, tau0, mu)
+        mu_app = apparent_tau / mean_gamma_dot if mean_gamma_dot != 0 else mu
 
-        # Reynolds number
+        # Calculate Reynolds number if inputs are valid
         if flow_rate > 0 and diameter > 0 and density > 0:
             re = (4 * density * flow_rate) / (np.pi * diameter * mu)
         else:
             re = 0.0
 
     except Exception as e:
-        print("Exception in Bingham model:", str(e))
+        print("ERROR in Bingham model:", str(e))
         tau0, mu, mu_app, r2, re = 0.0, 1.0, 1.0, 0.0, 0.0
 
-    # ✅ Final forced output values regardless of above
+    # Clean all values for JSON safety
+    tau0 = float(np.nan_to_num(tau0, nan=0.0))
+    mu = float(np.nan_to_num(mu, nan=1.0))
+    mu_app = float(np.nan_to_num(mu_app, nan=1.0))
+    r2 = float(np.nan_to_num(r2, nan=0.0))
+    re = float(np.nan_to_num(re, nan=0.0))
+
     return {
         "model": "Bingham Plastic",
-        "tau0": 2.0,
-        "mu": 0.18,
-        "mu_app": 0.23,
-        "r2": 0.999,
-        "re": 1410.0,
-        "equation": "τ = 2.0 + 0.18·γ̇"
+        "tau0": round(tau0, 6),
+        "mu": round(mu, 6),
+        "mu_app": round(mu_app, 6),
+        "r2": round(r2, 6),
+        "re": round(re, 2),
+        "equation": f"τ = {round(tau0, 2)} + {round(mu, 2)}·γ̇"
     }

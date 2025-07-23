@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: bingham-model-api
+    name: bingham-api
     env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: ""
     startCommand: python app.py
+
 
 
 
